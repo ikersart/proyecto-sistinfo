@@ -1,7 +1,7 @@
 #!/bin/bash
 
-TOKEN="TU_TOKEN_AQUI"
-CHAT_ID="TU_CHAT_ID_AQUI"
+TOKEN="8795064154:AAG65GxzVVOujqrs1TPYQtqY4C1pvfaYHa0"
+CHAT_ID="7236122030"
 
 mensaje="⚠️ ALERTA: SSH caído en $(hostname)"
 
