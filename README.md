@@ -12,7 +12,7 @@ Incluye comprobaciones de red, servicios, usuarios y puertos, además de una int
 
 ## Contenido
 
-- `alerta_ssh.sh` → Detecta conexiones SSH y muestra una alerta.
+- `alerta_ssh.sh` → Detecta conexiones SSH y manda una alerta mediante un bot de Telegram.
 - `comprobar_red.sh` → Verifica el estado de la red.
 - `comprobar_servicios.sh` → Comprueba el estado de servicios como Apache y SSH.
 - `menu.sh` → Menú principal con interfaz gráfica.
