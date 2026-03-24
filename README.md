@@ -8,7 +8,9 @@ Incluye comprobaciones de red, servicios, usuarios y puertos, además de una int
 - Linux
 - Bash
 - Zenity
-- Apache 
+- Apache
+- curl
+- jq
 
 ## Contenido
 
@@ -40,3 +42,4 @@ Instalación de dependencias en Ubuntu/Debian:
 sudo apt update
 sudo apt install zenity apache2 -y
 sudo apt install curl
+sudo apt install jq

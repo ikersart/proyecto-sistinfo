@@ -66,26 +66,32 @@ while true; do
 
 		if [[ $activo -eq 0 ]]; then
 
-			mensaje="El servicio \"$servicio\" está caído."$'\n'$'\n'"$estado"$'\n'
-
 			rescatar_servicio "$servicio"
 			activo=$?
-
-			if [[ $activo -eq 1 ]]; then
-
-				mensaje="$mensaje✅ Se ha podido rescatar el servicio."
-			else
-				mensaje="$mensaje❌ No se ha podido rescatar el servicio."
-			fi
 
 			if [[ ${servicios_mensajes_timeouts[$i]} -le 0 ]]; then
 
 				# Añadir sobrante porque en esta misma iteración se va a decrementar.
 				servicios_mensajes_timeouts[$i]=$(( $mensaje_timeout + $iteration_timeout ))
 
-				curl -X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
-					-d chat_id=$telegram_chat_id \
-					-d text="$mensaje" \
+				mensaje="El servicio \"$servicio\" está caído."$'\n'$'\n'"$estado"$'\n'
+
+				if [[ $activo -eq 1 ]]; then
+
+					mensaje="$mensaje✅ Se ha podido rescatar el servicio."
+				else
+					mensaje="$mensaje❌ No se ha podido rescatar el servicio."
+				fi
+
+				payload=$(jq -n \
+					--arg chat_id "$telegram_chat_id" \
+					--arg text "$mensaje" \
+					'{ chat_id: $chat_id, text: $text }')
+
+				curl -v \
+					-X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
+					-H "Content-Type: application/json" \
+					-d "$payload" \
 					1> monitorizacion_mensaje_bot_stdout.txt 2> monitorizacion_mensaje_bot_stderr.txt
 			fi
 		fi
