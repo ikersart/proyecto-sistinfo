@@ -5,24 +5,24 @@ do
 opcion=$(zenity --list \
 --title="Administrador del Sistema" \
 --column="Opciones" \
-"Comprobar servicios" \
-"Comprobar red" \
+"Comprobar estado de los programas necesarios" \
+"Comprobar conexión" \
 "Usuarios conectados" \
-"Puertos abiertos" \
+"Ver puertos abiertos" \
 "Salir")
 
 case $opcion in
-    "Comprobar servicios")
+    "Comprobar estado de los programas necesarios")
         ./comprobar_servicios.sh
         ;;
-    "Comprobar red")
+    "Comprobar conexión")
         IP=$(zenity --entry --text="Introduce la IP")
         ./comprobar_red.sh $IP
         ;;
     "Usuarios conectados")
         ./usuarios.sh
         ;;
-    "Puertos abiertos")
+    "Ver puertos abiertos")
         ./puertos.sh
         ;;
     "Salir")
