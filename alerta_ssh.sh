@@ -3,12 +3,12 @@
 TOKEN="8795064154:AAG65GxzVVOujqrs1TPYQtqY4C1pvfaYHa0"
 CHAT_ID="7236122030"
 
-mensaje="⚠️ ALERTA: SSH caído en $(hostname)"
+STATUS=$(systemctl is-active ssh)
 
-curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
--d chat_id=$CHAT_ID \
--d text="$mensaje" > telegram_out.txt 2> telegram_error.txt
-
-if [ $? -ne 0 ]; then
-    echo "Error al enviar alerta" >> telegram_error.txt
+if [ "$STATUS" != "active" ]; then
+    MENSAJE="🚨 ALERTA: SSH está CAÍDO en $(hostname) a las $(date)"
+    
+    curl -s -X POST https://api.telegram.org/bot$TOKEN/sendMessage \
+      -d chat_id=$CHAT_ID \
+      -d text="$MENSAJE"
 fi
