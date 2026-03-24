@@ -1,4 +1,8 @@
+
 #!/bin/bash
+
+mensaje_timeout=5
+iteration_timeout=5
 
 comprobar_servicio() {
 
@@ -46,10 +50,10 @@ telegram_bot_token="8795064154:AAG65GxzVVOujqrs1TPYQtqY4C1pvfaYHa0"
 telegram_chat_id="7236122030"
 
 servicios=("ssh" "apache2" "proyecto_sistinfo_monitorizacion")
-servicios_previamente_activos=()
+servicios_mensajes_timeouts=()
 
 for ((i=0; i<${#servicios[@]}; i++)); do
-	servicios_previamente_activos[i]=0
+	servicios_mensajes_timeouts[$i]=$mensaje_timeout
 done
 
 while true; do
@@ -75,19 +79,24 @@ while true; do
 				mensaje="$mensaje❌ No se ha podido rescatar el servicio."
 			fi
 
-			if [[ ${servicios_previamente_activos[$i]} -eq 1 ]]; then
+			if [[ ${servicios_mensajes_timeouts[$i]} -le 0 ]]; then
 
+				# Añadir sobrante porque en esta misma iteración se va a decrementar.
+				servicios_mensajes_timeouts[$i]=$(( $mensaje_timeout + $iteration_timeout ))
+
+				echo "probando"
 				curl -s -o /dev/null \
 					-X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
 					-d chat_id=$telegram_chat_id \
 					-d text="$mensaje"
 			fi
+		fi
 
-			servicios_previamente_activos[$i]=$activo
-		else
-			servicios_previamente_activos[$i]=$activo
+		if [[ ${servicios_mensajes_timeouts[$i]} -gt 0 ]]; then
+
+			servicios_mensajes_timeouts[$i]=$(( servicios_mensajes_timeouts[$i] - $iteration_timeout ))
 		fi
 	done
 
-	sleep 5
+	sleep $iteration_timeout
 done
