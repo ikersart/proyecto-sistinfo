@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 mensaje_timeout=5
@@ -84,11 +83,10 @@ while true; do
 				# Añadir sobrante porque en esta misma iteración se va a decrementar.
 				servicios_mensajes_timeouts[$i]=$(( $mensaje_timeout + $iteration_timeout ))
 
-				echo "probando"
-				curl -s -o /dev/null \
-					-X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
+				curl -X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
 					-d chat_id=$telegram_chat_id \
-					-d text="$mensaje"
+					-d text="$mensaje" \
+					1> monitorizacion_mensaje_bot_stdout.txt 2> monitorizacion_mensaje_bot_stderr.txt
 			fi
 		fi
 
