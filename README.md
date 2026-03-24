@@ -39,3 +39,4 @@ Instalación de dependencias en Ubuntu/Debian:
 ```bash
 sudo apt update
 sudo apt install zenity apache2 -y
+sudo apt install curl
