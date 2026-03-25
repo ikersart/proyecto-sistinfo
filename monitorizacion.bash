@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Variables de la lógica principal de la script.
@@ -96,15 +97,24 @@ while true; do
 			nuevamente_activo=$?
 		fi
 
+		servicios_activos[$i]=$nuevamente_activo
+
+		# No enviar mensajes en la primera iteración. Complica la lógica y no es necesario.
+		if [[ $primera_iteracion -eq 1 ]]; then
+
+			primera_iteracion=0
+			continue
+		fi
+
 		# Sólo avisa una vez se ha conseguido rescatar, después de que llevase un tiempo caído.
-		if [[ $previamente_activo -eq 0 and $nuevamente_activo -eq 1 ]]; then
+		if [[ $previamente_activo -eq 0 && $nuevamente_activo -eq 1 ]]; then
 
 				enviar_mensaje=1
 				mensaje+="✅ Se ha rescatado el servicio \"$servicio\" que estaba caído."
 		fi
 
 		# Avisa si se ha caido ahora mismo, pero no avisa si ya estaba caído.
-		if [[ $previamente_activo -eq 1 and $actualmente_activo -eq 0 ]]; then
+		if [[ $previamente_activo -eq 1 && $actualmente_activo -eq 0 ]]; then
 
 			enviar_mensaje=1
 			mensaje+="El servicio \"$servicio\" se ha caído."$'\n'$'\n'
@@ -116,8 +126,6 @@ while true; do
 				mensaje+="❌ No se ha podido rescatar el servicio."$'\n'$'\n'"$estado"
 			fi
 		fi
-
-		servicios_activos[$i]=$nuevamente_activo
 
 		if [[ $enviar_mensaje -eq 1 ]]; then
 
@@ -137,5 +145,4 @@ while true; do
 	done
 
 	sleep $tiempo_de_espera_entre_comprobaciones
-	primera_iteracion=0
 done
