@@ -5,7 +5,7 @@ servicios=("ssh" "apache2" "proyecto_sistinfo_monitorizacion")
 tiempo_de_espera_entre_comprobaciones=5
 
 # Variables de entorno necesarias.
-archivo_de_variables_de_entorno_privadas="./telegram.env"
+archivo_de_variables_de_entorno_privadas="../telegram.env" # Fuera del repositorio por motivos de seguridad. No queremos subirlo a internet por accidente.
 variables_de_entorno_privadas=("telegram_bot_token" "telegram_chat_id")
 
 if [[ ! -f "$archivo_de_variables_de_entorno_privadas" ]]; then
