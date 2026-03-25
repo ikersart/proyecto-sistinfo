@@ -1,7 +1,30 @@
 #!/bin/bash
 
-mensaje_timeout=5
-iteration_timeout=5
+# Variables de la lógica principal de la script.
+servicios=("ssh" "apache2" "proyecto_sistinfo_monitorizacion")
+tiempo_de_espera_entre_comprobaciones=5
+
+# Variables de entorno necesarias.
+archivo_de_variables_de_entorno_privadas="./telegram.env"
+variables_de_entorno_privadas=("telegram_bot_token" "telegram_chat_id")
+
+if [[ ! -f "$archivo_de_variables_de_entorno_privadas" ]]; then
+
+	echo "Falta el archivo de variables de entorno privadas \"$archivo_de_variables_de_entorno_privadas\"." 1>&2
+	exit 1
+fi
+
+# Cargar variables de entorno.
+source "$archivo_de_variables_de_entorno_privadas"
+
+for variable_de_entorno_privada in "${variables_de_entorno_privadas[@]}"; do
+
+	if [[ -z "${!variable_de_entorno_privada}" ]]; then
+
+		echo "Falta la variable de entorno privada \"$variable_de_entorno_privada\" en el archivo \"$archivo_de_variables_de_entorno_privadas\"."
+		exit 1
+	fi
+done
 
 comprobar_servicio() {
 
@@ -45,14 +68,11 @@ rescatar_servicio() {
 	return $activo
 }
 
-telegram_bot_token="8795064154:AAG65GxzVVOujqrs1TPYQtqY4C1pvfaYHa0"
-telegram_chat_id="7236122030"
-
-servicios=("ssh" "apache2" "proyecto_sistinfo_monitorizacion")
-servicios_mensajes_timeouts=()
+primera_iteracion=1
+servicios_activos=()
 
 for ((i=0; i<${#servicios[@]}; i++)); do
-	servicios_mensajes_timeouts[$i]=$mensaje_timeout
+	servicios_activos[$i]=0
 done
 
 while true; do
@@ -60,47 +80,62 @@ while true; do
 	for ((i=0; i<${#servicios[@]}; i++)); do
 
 		servicio="${servicios[$i]}"
+		previamente_activo=${servicios_activos[$i]}
 
 		estado="$(comprobar_servicio $servicio)"
-		activo=$?
+		actualmente_activo=$?
 
-		if [[ $activo -eq 0 ]]; then
+		enviar_mensaje=0
+		mensaje=""
+
+		nuevamente_activo=$actualmente_activo
+
+		if [[ $actualmente_activo -eq 0 ]]; then
 
 			rescatar_servicio "$servicio"
-			activo=$?
+			nuevamente_activo=$?
+		fi
 
-			if [[ ${servicios_mensajes_timeouts[$i]} -le 0 ]]; then
+		# Sólo avisa una vez se ha conseguido rescatar, después de que llevase un tiempo caído.
+		if [[ $previamente_activo -eq 0 and $nuevamente_activo -eq 1 ]]; then
 
-				# Añadir sobrante porque en esta misma iteración se va a decrementar.
-				servicios_mensajes_timeouts[$i]=$(( $mensaje_timeout + $iteration_timeout ))
+				enviar_mensaje=1
+				mensaje+="✅ Se ha rescatado el servicio \"$servicio\" que estaba caído."
+		fi
 
-				mensaje="El servicio \"$servicio\" está caído."$'\n'$'\n'"$estado"$'\n'
+		# Avisa si se ha caido ahora mismo, pero no avisa si ya estaba caído.
+		if [[ $previamente_activo -eq 1 and $actualmente_activo -eq 0 ]]; then
 
-				if [[ $activo -eq 1 ]]; then
+			enviar_mensaje=1
+			mensaje+="El servicio \"$servicio\" se ha caído."$'\n'$'\n'
 
-					mensaje="$mensaje✅ Se ha podido rescatar el servicio."
-				else
-					mensaje="$mensaje❌ No se ha podido rescatar el servicio."
-				fi
+			if [[ $nuevamente_activo -eq 1 ]]; then
 
-				payload=$(jq -n \
-					--arg chat_id "$telegram_chat_id" \
-					--arg text "$mensaje" \
-					'{ chat_id: $chat_id, text: $text }')
-
-				curl -v \
-					-X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
-					-H "Content-Type: application/json" \
-					-d "$payload" \
-					1> monitorizacion_mensaje_bot_stdout.txt 2> monitorizacion_mensaje_bot_stderr.txt
+				mensaje+="✅ Se ha podido rescatar el servicio."
+			else
+				mensaje+="❌ No se ha podido rescatar el servicio."$'\n'$'\n'"$estado"
 			fi
 		fi
 
-		if [[ ${servicios_mensajes_timeouts[$i]} -gt 0 ]]; then
+		servicios_activos[$i]=$nuevamente_activo
 
-			servicios_mensajes_timeouts[$i]=$(( servicios_mensajes_timeouts[$i] - $iteration_timeout ))
+		if [[ $enviar_mensaje -eq 1 ]]; then
+
+			mkdir -p ./logs/monitorizacion/telegram_bot
+
+			payload=$(jq -n \
+				--arg chat_id "$telegram_chat_id" \
+				--arg text "$mensaje" \
+				'{ chat_id: $chat_id, text: $text }')
+
+			curl -v \
+				-X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
+				-H "Content-Type: application/json" \
+				-d "$payload" \
+				1> ./logs/monitorizacion/telegram_bot/curl_stdout.txt 2> ./logs/monitorizacion/telegram_bot/curl_stderr.txt
 		fi
 	done
 
-	sleep $iteration_timeout
+	sleep $tiempo_de_espera_entre_comprobaciones
+	primera_iteracion=0
 done
