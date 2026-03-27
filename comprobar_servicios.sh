@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # SSH
-systemctl is-active ssh > ssh_out.txt 2> ssh_error.txt
+systemctl is-active ssh > logs/ssh_out.txt 2> logs/ssh_error.txt
 estado_ssh=$?
 
 # Apache
-systemctl is-active apache2 > apache_out.txt 2> apache_error.txt
+systemctl is-active apache2 > logs/apache_out.txt 2> logs/apache_error.txt
 estado_apache=$?
 
 # Monitorización
-systemctl is-active proyecto_sistinfo_monitorizacion > monitorizacion_out.txt 2> monitorizacion_error.txt
+systemctl is-active proyecto_sistinfo_monitorizacion > logs/monitorizacion_out.txt 2> logs/monitorizacion_error.txt
 estado_monitorizacion=$?
 
 mensaje="RESULTADO:\n\n"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-who > usuarios.txt 2> error_usuarios.txt
+who > logs/usuarios.txt 2> logs/error_usuarios.txt
 
 if [ $? -eq 0 ]; then
     zenity --text-info \

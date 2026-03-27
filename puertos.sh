@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ss -tuln > puertos.txt 2> error_puertos.txt
+ss -tuln > logs/puertos.txt 2> logs/error_puertos.txt
 
 if [ $? -eq 0 ]; then
     zenity --text-info \

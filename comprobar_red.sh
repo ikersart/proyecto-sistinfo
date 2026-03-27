@@ -7,7 +7,7 @@ if [ -z "$IP" ]; then
     exit 1
 fi
 
-ping -c 2 $IP > ping_out.txt 2> ping_error.txt
+ping -c 2 $IP > logs/ping_out.txt 2> logs/ping_error.txt
 
 if [ $? -eq 0 ]; then
     zenity --info --text="✅ Conexión correcta con $IP"
