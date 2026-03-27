@@ -4,7 +4,7 @@
 servicios=("ssh" "apache2" "proyecto_sistinfo_monitorizacion")
 tiempo_de_espera_entre_comprobaciones=5
 
-source ./cargar_variables/cargar_variables_telegram.bash
+source ../scripts_cargar_variables/cargar_variables_telegram.bash
 if [[ $? -ne 0 ]]; then
 	echo "Error al cargar las variables de entorno." 1>&2
 	exit 1

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-directorio_de_esta_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ruta_directorio_de_esta_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-ruta_script_servicio="$directorio_de_esta_script/monitorizacion.bash"
+ruta_script_servicio="$ruta_directorio_de_esta_script/monitorizacion.bash"
 ruta_configuracion_servicio="/etc/systemd/system/proyecto_sistinfo_monitorizacion.service"
 
 sudo echo "" >  "$ruta_configuracion_servicio"
@@ -19,7 +19,7 @@ sudo echo "[Service]" >> "$ruta_configuracion_servicio"
 
 sudo echo "User=root" >> "$ruta_configuracion_servicio"
 
-sudo echo "WorkingDirectory=$ruta_repositorio" >> "$ruta_configuracion_servicio"
+sudo echo "WorkingDirectory=$ruta_directorio_de_esta_script" >> "$ruta_configuracion_servicio"
 
 sudo echo "ExecStart=$ruta_script_servicio" >> "$ruta_configuracion_servicio"
 
