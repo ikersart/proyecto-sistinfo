@@ -45,13 +45,12 @@ rescatar_servicio() {
 	return $activo
 }
 
-# Inicializamos variables necesarias para la lógica de la mensajería.
+# Se inicializa el estado de los servicios a previamente activo para que envíe mensaje si están caídos en el momento de ejecutar la script.
 servicios_activos=()
 for ((i=0; i<${#servicios[@]}; i++)); do
-	servicios_activos[$i]=0
+	servicios_activos[$i]=1
 done
 
-primera_iteracion=1
 while true; do
 	for ((i=0; i<${#servicios[@]}; i++)); do
 		servicio="${servicios[$i]}"
@@ -69,12 +68,6 @@ while true; do
 
 		enviar_mensaje=0
 		mensaje=""
-
-		# No enviar mensajes en la primera iteración. Complica la lógica y no es necesario.
-		if [[ $primera_iteracion -eq 1 ]]; then
-			primera_iteracion=0
-			continue
-		fi
 
 		# Sólo avisa una vez se ha conseguido rescatar, después de que llevase un tiempo caído.
 		if [[ $previamente_activo -eq 0 && $nuevamente_activo -eq 1 ]]; then
