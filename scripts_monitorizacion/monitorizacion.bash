@@ -1,17 +1,43 @@
 #!/bin/bash
 
-ruta_carpeta_logs="../logs"
-
 # Variables de la lógica principal de la script.
 servicios=("ssh" "apache2" "proyecto_sistinfo_monitorizacion")
 tiempo_de_espera_entre_comprobaciones=5
 
+ruta_directorio_de_esta_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ruta_repositorio="$ruta_directorio_de_esta_script/.."
+ruta_carpeta_logs="$ruta_repositorio/logs"
+ruta_ssh_conexiones_logs="/var/log/auth.log"
+ruta_script_enviar_mensaje_telegram="$ruta_repositorio/enviar_mensaje_telegram.bash"
+
 # Cargamos las variables de entorno necesarias.
-source ../scripts_cargar_variables/cargar_variables_telegram.bash
+source "$ruta_repositorio/scripts_cargar_variables/cargar_variables_telegram.bash"
 if [[ $? -ne 0 ]]; then
-	echo "Error al cargar las variables de entorno." 1>&2
-	exit 1
+        echo "Error al cargar las variables de entorno." 1>&2
+        exit 1
 fi
+
+monitorizar_conexiones_ssh() {
+	# Esperar eventos de que el archivo ha cambiado e imprimir las líneas nuevas.
+	# El proceso de tail nunca se cierra hasta que se cierre esta script.
+	# Enviar este output al input del bucle while.
+	tail -Fn0 "$ruta_ssh_conexiones_logs" | \
+	while read -r line; do
+		# Comprobamos que la línea contenga el log de la conexión aceptada.
+		if [[ "$line" =~ "Accepted" && "$line" =~ "ssh2" ]]; then
+			usuario=$(echo "$line" | sed -n 's/.*for \([^ ]*\) from.*/\1/p')
+			ip=$(echo "$line" | sed -n 's/.*from \([^ ]*\) port.*/\1/p')
+			puerto=$(echo "$line" | sed -n 's/.*port \([0-9]*\) ssh.*/\1/p')
+
+			mensaje="🔐 Nueva conexión SSH detectada."$'\n'
+			mensaje+="Usuario: $usuario"$'\n'
+			mensaje+="Dirección IP: $ip"$'\n'
+			mensaje+="Puerto: $puerto"$'\n'
+
+			"$ruta_script_enviar_mensaje_telegram" "$mensaje" "$telegram_bot_token" "$telegram_chat_id"
+		fi
+	done
+}
 
 comprobar_servicio() {
 	local servicio="$1"
@@ -44,6 +70,9 @@ rescatar_servicio() {
 
 	return $activo
 }
+
+# Ejecutar en paralelo.
+monitorizar_conexiones_ssh &
 
 # Se inicializa el estado de los servicios a previamente activo para que envíe mensaje si están caídos en el momento de ejecutar la script.
 servicios_activos=()
@@ -89,17 +118,7 @@ while true; do
 
 		if [[ $enviar_mensaje -eq 1 ]]; then
 			mkdir -p "$ruta_carpeta_logs/monitorizacion/telegram_bot"
-
-			payload=$(jq -n \
-				--arg chat_id "$telegram_chat_id" \
-				--arg text "$mensaje" \
-				'{ chat_id: $chat_id, text: $text }')
-
-			curl -v \
-				-X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
-				-H "Content-Type: application/json" \
-				-d "$payload" \
-				1> "$ruta_carpeta_logs/monitorizacion/telegram_bot/curl_stdout.txt" 2> "$ruta_carpeta_logs/monitorizacion/telegram_bot/curl_stderr.txt"
+			"$ruta_script_enviar_mensaje_telegram" "$mensaje" "$telegram_bot_token" "$telegram_chat_id"
 		fi
 	done
 	sleep $tiempo_de_espera_entre_comprobaciones
