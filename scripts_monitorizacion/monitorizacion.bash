@@ -1,9 +1,12 @@
 #!/bin/bash
 
+ruta_carpeta_logs="../logs"
+
 # Variables de la lógica principal de la script.
 servicios=("ssh" "apache2" "proyecto_sistinfo_monitorizacion")
 tiempo_de_espera_entre_comprobaciones=5
 
+# Cargamos las variables de entorno necesarias.
 source ../scripts_cargar_variables/cargar_variables_telegram.bash
 if [[ $? -ne 0 ]]; then
 	echo "Error al cargar las variables de entorno." 1>&2
@@ -42,6 +45,7 @@ rescatar_servicio() {
 	return $activo
 }
 
+# Inicializamos variables necesarias para la lógica de la mensajería.
 servicios_activos=()
 for ((i=0; i<${#servicios[@]}; i++)); do
 	servicios_activos[$i]=0
@@ -91,7 +95,7 @@ while true; do
 		fi
 
 		if [[ $enviar_mensaje -eq 1 ]]; then
-			mkdir -p ./logs/monitorizacion/telegram_bot
+			mkdir -p "$ruta_carpeta_logs/monitorizacion/telegram_bot"
 
 			payload=$(jq -n \
 				--arg chat_id "$telegram_chat_id" \
@@ -102,7 +106,7 @@ while true; do
 				-X POST "https://api.telegram.org/bot$telegram_bot_token/sendMessage" \
 				-H "Content-Type: application/json" \
 				-d "$payload" \
-				1> ./logs/monitorizacion/telegram_bot/curl_stdout.txt 2> ./logs/monitorizacion/telegram_bot/curl_stderr.txt
+				1> "$ruta_carpeta_logs/monitorizacion/telegram_bot/curl_stdout.txt" 2> "$ruta_carpeta_logs/monitorizacion/telegram_bot/curl_stderr.txt"
 		fi
 	done
 	sleep $tiempo_de_espera_entre_comprobaciones
