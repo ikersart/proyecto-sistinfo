@@ -33,8 +33,8 @@ monitorizar_conexiones_ssh() {
 	while read -r line; do
 		# Comprobamos que la línea contenga el log de la conexión aceptada.
 		if [[ "$line" =~ "Accepted" && "$line" =~ "ssh2" ]]; then
-			usuario=$(echo "$line" | sed -n 's/.*for \([^ ]*\) from.*/\1/p')
-			ip=$(echo "$line" | sed -n 's/.*from \([^ ]*\) port.*/\1/p')
+			usuario=$(echo "$line" | sed -n 's/.*for \([^ ]\+\) from.*/\1/p')
+			ip=$(echo "$line" | sed -n 's/.*from \([0-9.]*\) port.*/\1/p')
 			puerto=$(echo "$line" | sed -n 's/.*port \([0-9]*\) ssh.*/\1/p')
 
 			mensaje="🔐 Nueva conexión SSH detectada."$'\n'
