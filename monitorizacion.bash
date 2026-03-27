@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Variables de la lógica principal de la script.
