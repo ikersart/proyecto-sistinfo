@@ -1,19 +1,27 @@
 #!/bin/bash
 
 # Variables de la lógica principal de la script.
-servicios=("ssh" "apache2" "proyecto_sistinfo_monitorizacion")
 tiempo_de_espera_entre_comprobaciones=5
 
+# Para que de error al utilizar variables no definidas.
+set -o nounset
+
+# Variables de rutas.
 ruta_directorio_de_esta_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ruta_repositorio="$ruta_directorio_de_esta_script/.."
 ruta_carpeta_logs="$ruta_repositorio/logs"
 ruta_ssh_conexiones_logs="/var/log/auth.log"
 ruta_script_enviar_mensaje_telegram="$ruta_repositorio/enviar_mensaje_telegram.bash"
+ruta_script_cargar_variables_servicios="$ruta_repositorio/scripts_cargar_variables/cargar_variables_servicios.bash"
+ruta_script_cargar_variables_telegram="$ruta_repositorio/scripts_cargar_variables/cargar_variables_telegram.bash"
 
 # Cargamos las variables de entorno necesarias.
-source "$ruta_repositorio/scripts_cargar_variables/cargar_variables_telegram.bash"
+source "$ruta_script_cargar_variables_servicios"
 if [[ $? -ne 0 ]]; then
-        echo "Error al cargar las variables de entorno." 1>&2
+        exit 1
+fi
+source "$ruta_script_cargar_variables_telegram"
+if [[ $? -ne 0 ]]; then
         exit 1
 fi
 
@@ -76,13 +84,13 @@ monitorizar_conexiones_ssh &
 
 # Se inicializa el estado de los servicios a previamente activo para que envíe mensaje si están caídos en el momento de ejecutar la script.
 servicios_activos=()
-for ((i=0; i<${#servicios[@]}; i++)); do
+for ((i=0; i<${#array_nombres_servicios[@]}; i++)); do
 	servicios_activos[$i]=1
 done
 
 while true; do
-	for ((i=0; i<${#servicios[@]}; i++)); do
-		servicio="${servicios[$i]}"
+	for ((i=0; i<${#array_nombres_servicios[@]}; i++)); do
+		servicio="${array_nombres_servicios[$i]}"
 		previamente_activo=${servicios_activos[$i]}
 
 		estado="$(comprobar_servicio $servicio)"
