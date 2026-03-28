@@ -17,13 +17,25 @@ comprobar_dependencias() {
 
 	# Cargar nombres de dependencias
 	array_nombres_dependencias=()
-	source "$ruta_repositorio/scripts/cargar_variables/cargar_variables_dependencias.bash" || return 1
+	source "$ruta_repositorio/scripts/cargar_variables/cargar_variables_dependencias.bash"
+	if [[ $? -ne 0 ]]; then
+		echo "Error al llamar a la script de cargar las variables de las dependencias" 1>&2
+		return 1
+	fi
 
 	# Obtener lista de paquetes actualizables UNA sola vez
 	local lista_actualizables=
 	if [[ $actualizar_paquetes -eq 1 ]]; then
-		apt update > "/dev/null" 2> "/dev/null" || return 1
-		lista_actualizables="$(apt list --upgradable 2> "/dev/null")" || return 1
+		apt update > "/dev/null"
+		if [[ $? -ne 0 ]]; then
+			echo "Error al llamar apt update." 1>&2
+			return 1
+		fi 
+		lista_actualizables="$(apt list --upgradable)"
+		if [[ $? -ne 0 ]]; then
+			echo "Error al llamar apt list." 1>&2
+			return 1
+		fi 
 	fi
 
 	array_estados_dependencias=()

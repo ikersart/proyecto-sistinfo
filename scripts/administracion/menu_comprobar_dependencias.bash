@@ -32,11 +32,14 @@ else
 	actualizar_paquetes=1
 fi
 
-source "$ruta_directorio_de_esta_script/comprobar_dependencias.bash" "$actualizar_paquetes"
+tmp_err="$(mktemp)"
+source "$ruta_directorio_de_esta_script/comprobar_dependencias.bash" "$actualizar_paquetes" 2> "$tmp_err"
 codigo_salida_comprobacion=$?
 if [ $codigo_salida_comprobacion -ne 0 ]; then
-	terminar_script_con_error "Error al comprobar dependencias."
+	terminar_script_con_error "Error al comprobar dependencias."$'\n'$'\n'"$(cat "$tmp_err")"
+	rm -f "$tmp_err"
 fi
+rm -f "$tmp_err"
 
 funcion_instalar_dependencia() {
 	nombre_dependencia="$1"
