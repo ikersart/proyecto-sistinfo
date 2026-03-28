@@ -9,7 +9,11 @@ cargar_variables() {
 
 	ruta_archivo_configuracion_dependencias="$ruta_repositorio/configuracion/dependencias.env"
 
-        source "$ruta_scripts_cargar_variables/cargar_variables.bash" "$ruta_archivo_configuracion_dependencias" || return 1
+        source "$ruta_scripts_cargar_variables/cargar_variables.bash" "$ruta_archivo_configuracion_dependencias"
+	if [[ $? -ne 0 ]]; then
+		echo "Error al llamar a la script genérica para cargar variables del archivo de configuración de dependencias." 1>&2
+		return 1
+	fi
 
         array_nombres_variable_dependencias=("${array_nombres_variables[@]}")
 
@@ -24,8 +28,7 @@ cargar_variables() {
 
 # Ejecutar esta script solo si se llama de la manera correcta ( source ruta_script.bash ).
 if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
-	cargar_variables
-	return $?
+	cargar_variables || return 1
 else
 	echo "Esta script debe de llamarse con \"source $0\"." 1>&2
 	exit 1

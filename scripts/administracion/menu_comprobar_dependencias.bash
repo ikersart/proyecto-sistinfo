@@ -6,12 +6,10 @@ ruta_repositorio="$ruta_directorio_de_esta_script/../.."
 terminar_script_con_error() {
 	mensaje_error="$1"
 	zenity --error --text="$mensaje_error"
-	if [[ $? -eq 0 ]]; then
-		exit 1
-	else
+	if [[ $? -ne 0 ]]; then
 		echo "$mensaje_error"
-		exit 1
 	fi
+	exit 1
 }
 
 respuesta_actualizar=$(zenity --info \
@@ -33,9 +31,11 @@ else
 fi
 
 tmp_err="$(mktemp)"
+if [ $? -ne 0 ]; then
+	terminar_script_con_error "Error al crear archivo temporal. Comprueba los permisos."
+fi
 source "$ruta_directorio_de_esta_script/comprobar_dependencias.bash" "$actualizar_paquetes" 2> "$tmp_err"
-codigo_salida_comprobacion=$?
-if [ $codigo_salida_comprobacion -ne 0 ]; then
+if [ $? -ne 0 ]; then
 	terminar_script_con_error "Error al comprobar dependencias."$'\n'$'\n'"$(cat "$tmp_err")"
 	rm -f "$tmp_err"
 fi
@@ -97,13 +97,6 @@ while true; do
 		--hide-column=1 \
 		--print-column=ALL)
 
-	if [[ $? -ne 0 ]]; then
-		if [[ -z "$fila_seleccionada" ]]; then
-			exit 0
-		fi
-		terminar_script_con_error "Error crítico en Zenity."
-	fi
-
 	# Zenity devuelve: "ID ESTADO NOMBRE"
 	IFS='|' read -r indice_dependencia estado_emoji nombre_dependencia <<< "$fila_seleccionada"
 
@@ -132,4 +125,3 @@ while true; do
 	esac
 
 done
-
