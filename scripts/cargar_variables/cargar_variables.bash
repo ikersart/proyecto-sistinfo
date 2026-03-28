@@ -38,5 +38,5 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
 	return $?
 else
 	echo "Esta script debe de llamarse con \"source $0\"." 1>&2
-	return 1 2>/dev/null || exit 1
+	exit 1
 fi

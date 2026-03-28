@@ -10,15 +10,9 @@ cargar_variables() {
 	local ruta_archivo_configuracion="$ruta_configuracion/dependencias.env"
 	array_nombres_variables=("nombres_dependencias")
 
-        source "$ruta_scripts_cargar_variables/cargar_variables.bash" "$ruta_archivo_configuracion" "${array_nombres_variables[@]}"
-        if [[ $? -ne 0 ]]; then
-                return 1
-        fi
+        source "$ruta_scripts_cargar_variables/cargar_variables.bash" "$ruta_archivo_configuracion" "${array_nombres_variables[@]}" || return 1
 
         IFS=',' read -r -a array_nombres_dependencias <<< "$nombres_dependencias"
-        if [[ $? -ne 0 ]]; then
-                return 1
-        fi
 
         return 0
 }
@@ -29,5 +23,5 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
 	return $?
 else
 	echo "Esta script debe de llamarse con \"source $0\"." 1>&2
-	return 1 2>/dev/null || exit 1
+	exit 1
 fi

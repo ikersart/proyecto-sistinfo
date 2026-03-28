@@ -19,14 +19,8 @@ ruta_script_cargar_variables_servicios="$ruta_scripts_cargar_variables/cargar_va
 ruta_script_cargar_variables_telegram="$ruta_scripts_cargar_variables/cargar_variables_telegram.bash"
 
 # Cargamos las variables de entorno necesarias.
-source "$ruta_script_cargar_variables_servicios"
-if [[ $? -ne 0 ]]; then
-        exit 1
-fi
-source "$ruta_script_cargar_variables_telegram"
-if [[ $? -ne 0 ]]; then
-        exit 1
-fi
+source "$ruta_script_cargar_variables_servicios" || exit 1
+source "$ruta_script_cargar_variables_telegram" || exit 1
 
 monitorizar_conexiones_ssh() {
 	# Esperar eventos de que el archivo ha cambiado e imprimir las líneas nuevas.
