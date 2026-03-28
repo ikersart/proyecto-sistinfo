@@ -24,7 +24,7 @@ case $opcion in
 		./scripts/administracion/menu_comprobar_dependencias.bash
 	;;
 	"$opcion_monitorizacion_automatizada")
-		./scripts/administracion/gestionar_monitorizacion.bash
+		./scripts/administracion/gestionar_monitorizacion_automatizada.bash
 	;;
 	"$opcion_comprobar_servicios")
 		./comprobar_servicios.sh
