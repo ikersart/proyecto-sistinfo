@@ -1,0 +1,12 @@
+[Unit]
+Description=Servicio de monitorización del servidor del proyecto de sistemas informáticos.
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=${ruta_directorio_script_monitorizacion}
+ExecStart=${ruta_script_monitorizacion}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
