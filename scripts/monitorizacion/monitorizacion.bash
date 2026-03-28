@@ -8,12 +8,15 @@ set -o nounset
 
 # Variables de rutas.
 ruta_directorio_de_esta_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ruta_repositorio="$ruta_directorio_de_esta_script/.."
-ruta_carpeta_logs="$ruta_repositorio/logs"
+ruta_repositorio="$ruta_directorio_de_esta_script/../.."
+ruta_carpeta_logs="$ruta_repositorio/logs/monitorizacion"
+ruta_carpeta_logs_telegram="$ruta_carpeta_logs/telegram"
 ruta_ssh_conexiones_logs="/var/log/auth.log"
-ruta_script_enviar_mensaje_telegram="$ruta_repositorio/enviar_mensaje_telegram.bash"
-ruta_script_cargar_variables_servicios="$ruta_repositorio/scripts_cargar_variables/cargar_variables_servicios.bash"
-ruta_script_cargar_variables_telegram="$ruta_repositorio/scripts_cargar_variables/cargar_variables_telegram.bash"
+ruta_script_enviar_mensaje_telegram="$ruta_repositorio/scripts/enviar_mensaje_telegram.bash"
+ruta_scripts="$ruta_repositorio/scripts"
+ruta_scripts_cargar_variables="$ruta_scripts/cargar_variables"
+ruta_script_cargar_variables_servicios="$ruta_scripts_cargar_variables/cargar_variables_servicios.bash"
+ruta_script_cargar_variables_telegram="$ruta_scripts_cargar_variables/cargar_variables_telegram.bash"
 
 # Cargamos las variables de entorno necesarias.
 source "$ruta_script_cargar_variables_servicios"
@@ -42,7 +45,7 @@ monitorizar_conexiones_ssh() {
 			mensaje+="Dirección IP: $ip"$'\n'
 			mensaje+="Puerto: $puerto"$'\n'
 
-			"$ruta_script_enviar_mensaje_telegram" "$mensaje" "$telegram_bot_token" "$telegram_chat_id"
+			"$ruta_script_enviar_mensaje_telegram" "$ruta_carpeta_logs_telegram" "$mensaje" "$telegram_bot_token" "$telegram_chat_id"
 		fi
 	done
 }
@@ -125,8 +128,7 @@ while true; do
 		fi
 
 		if [[ $enviar_mensaje -eq 1 ]]; then
-			mkdir -p "$ruta_carpeta_logs/monitorizacion/telegram_bot"
-			"$ruta_script_enviar_mensaje_telegram" "$mensaje" "$telegram_bot_token" "$telegram_chat_id"
+			"$ruta_script_enviar_mensaje_telegram" "$ruta_carpeta_logs_telegram" "$mensaje" "$telegram_bot_token" "$telegram_chat_id"
 		fi
 	done
 	sleep $tiempo_de_espera_entre_comprobaciones
