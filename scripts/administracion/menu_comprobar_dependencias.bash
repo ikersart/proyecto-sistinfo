@@ -97,6 +97,10 @@ while true; do
 		--hide-column=1 \
 		--print-column=ALL)
 
+	if [[ $? -ne 0 && -z "$fila_seleccionada" ]]; then
+		exit 0
+	fi
+
 	# Zenity devuelve: "ID ESTADO NOMBRE"
 	IFS='|' read -r indice_dependencia estado_emoji nombre_dependencia <<< "$fila_seleccionada"
 
