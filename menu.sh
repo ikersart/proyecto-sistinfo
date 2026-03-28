@@ -1,5 +1,5 @@
 #!/bin/bash
-
+mkdir -p logs
 opcion_comprobar_servicios="Comprobar estado de los programas necesarios"
 opcion_comprobar_conexion="Comprobar conexión"
 opcion_ver_usuarios_conectados="Usuarios conectados"
