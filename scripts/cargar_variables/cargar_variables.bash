@@ -1,18 +1,12 @@
 #!/bin/bash
 
 cargar_variables() {
-	if [[ ! $# -gt 0 ]]; then
-		echo "Falta el primer parámetro, la ruta del archivo de las variables de entorno." 1>&2
+	if [[ $# -ne 1 ]]; then
+		echo "Esperado un único parámetro: La ruta del archivo de las variables de entorno." 1>&2
 		return 1
 	fi
-	local archivo_variables="$1"
-	shift
 
-	if [[ ! $# -gt 0 ]]; then
-		echo "Falta el segundo parámetro, una array con los nombres de las variables de entorno." 1>&2
-		return 1
-	fi
-	local array_variables=("$@")
+	archivo_variables="$1"
 
 	# Comprobar que el archivo de las variables de entorno existe.
 	if [[ ! -f "$archivo_variables" ]]; then
@@ -23,10 +17,16 @@ cargar_variables() {
 	# Cargar variables de entorno.
 	source "$archivo_variables"
 
+	IFS=',' read -r -a array_nombres_variables <<< "$nombres_variables"
+	if [[ $? -ne 0 ]]; then
+		echo "Error al cargar la primera variable de entorno: Una lista separada por comas de los nombres del resto de variables de entorno en el archivo de configuración." 1>&2
+		return 1
+	fi
+
 	# Comprobar que las variables de entorno están definidas.
-	for variable in "${array_variables[@]}"; do
-	        if [[ -z "${!variable}" ]]; then
-	                echo "Falta la variable de entorno privada \"$variable\" en el archivo \"$archivo_variables\"." 1>&2
+	for nombre_variable in "${array_nombres_variables[@]}"; do
+	        if [[ -z "${!nombre_variable}" ]]; then
+	                echo "Falta la variable de entorno \"$nombre_variable\" en el archivo \"$archivo_variables\"." 1>&2
 	                return 1
 	        fi
 	done

@@ -7,12 +7,17 @@ cargar_variables() {
         local ruta_scripts="$ruta_repositorio/scripts"
         local ruta_scripts_cargar_variables="$ruta_scripts/cargar_variables"
 
-	local ruta_archivo_configuracion="$ruta_configuracion/servicios.env"
-	array_nombres_variables=("nombres_servicios")
+	ruta_archivo_configuracion_servicios="$ruta_configuracion/servicios.env"
 
-	source "$ruta_scripts_cargar_variables/cargar_variables.bash" "$ruta_archivo_configuracion" "${array_nombres_variables[@]}" || return 1
+	source "$ruta_scripts_cargar_variables/cargar_variables.bash" "$ruta_archivo_configuracion_servicios" || return 1
 
-	IFS=',' read -r -a array_nombres_servicios <<< "$nombres_servicios" || return 1
+	array_nombres_variable_servicios=("${array_nombres_variables[@]}")
+
+	IFS=',' read -r -a array_nombres_servicios <<< "$nombres_servicios"
+	if [[ $? -ne 0 ]]; then
+		echo "Error al cargar variable \"array_nombres_servicios\"." 1>&2
+		return 1
+	fi
 
 	return 0
 }
