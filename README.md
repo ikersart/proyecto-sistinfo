@@ -23,8 +23,8 @@ sudo apt update && sudo apt install zenity apache2 curl jq -y
 - `puertos.sh` → Muestra puertos abiertos del sistema.
 - `usuarios.sh` → Información sobre usuarios del sistema.
 
-## Ejecutar el menú principal
-./menu.sh
+## Ejecutar el menú principal como admin
+sudo ./menu.sh 
 
 ## Ejecutar scripts individuales
 ./alerta_ssh.sh
